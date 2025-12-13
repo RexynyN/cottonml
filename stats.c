@@ -6,6 +6,12 @@
 #include <string.h>
 
 
+typedef const double* Tuple2;
+
+Tuple2 createTuple2(double a, double b) {
+    return (const double[]) { a, b };
+}
+
 double randDouble() {
     // Creates a number from 0 to 1
     return (double)rand() / (double)RAND_MAX;
@@ -53,6 +59,7 @@ double max(Vector* v) {
         if (v->data[i] > max) 
             max = v->data[i];
     }
+
     return max; 
 }
 
@@ -257,6 +264,10 @@ double normalCdf(double x, double mu, double sigma) {
 }
     
 double inverseNormalCdf(double p, double mu, double sigma, double tolerance) {
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+    if (tolerance == NAN) tolerance = 0.00001;
+    
     // If not standard, compute standard and rescale
     if (mu != 0 || sigma != 1) {
         return mu + sigma * inverseNormalCdf(p, 0, 1, tolerance);
@@ -287,6 +298,89 @@ int binomial(int n, double p) {
     return sum;
 }
 
+
+Tuple2 normalApproximationToBinomial(int n, double p) {
+    double mu = p * n; 
+    double sigma = sqrt(p * (1 - p ) * n);
+
+    return createTuple2(mu, sigma);  
+}
+
+double normalProbabilityAbove(double lo, double mu, double sigma){
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+
+    return 1 - normalCdf(lo, mu, sigma);
+}
+
+double normalProbabilityBelow(double lo, double mu, double sigma){
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+
+    return normalCdf(lo, mu, sigma);
+}
+
+double normalProbabilityBetween(double lo, double hi, double mu, double sigma) {
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+
+    return normalCdf(hi, mu, sigma) - normalCdf(lo, mu, sigma);
+}
+double normalProbabilityOutside(double lo, double hi, double mu, double sigma) {
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+
+    return 1 - normalProbabilityBetween(lo, hi, mu, sigma);
+}
+
+
+double normalUpperBound(double probability, double mu, double sigma) {
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+
+    return inverseNormalCdf(probability, mu, sigma, NAN);
+}
+
+double normalLowerBound(double probability, double mu, double sigma) {
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+
+    return inverseNormalCdf(1- probability, mu, sigma, NAN);
+}
+
+Tuple2 normalLowerBound(double probability, double mu, double sigma) {
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+
+    double tailProb = (1 - probability) / 2;
+
+    double upperBound = normalLowerBound(tailProb, mu, sigma);
+    double lowerBound = normalUpperBound(tailProb, mu, sigma);
+
+    return createTuple2(lowerBound, upperBound);  
+}
+
+double twoSidedPValue(double x, double mu, double sigma) {
+    if (mu == NAN) mu = 0;
+    if (sigma == NAN) sigma = 1;
+
+    if (x >= mu)
+        return 2 * normalProbabilityAbove(x, mu, sigma);
+
+    return 2 * normalProbabilityBelow(x, mu, sigma);
+}
+
+
+// =================================================================
+//                          AB TESTS 
+// =================================================================
+
+Tuple2 estimatedParameters(long N, long n) {
+    double p = n * 1.0 / N;
+    double sigma = sqrt((p * (1 - p)) / N);
+
+    return createTuple2(p, sigma);  
+}
 
 int main() {
     double a_data[] = { 1.0, 2.0, 3.0, 3.0, 4.0, 2.0, 4.0, 7.0 };
