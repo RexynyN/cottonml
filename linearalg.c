@@ -180,7 +180,7 @@ Vector vectorMean(Matrix* m) {
 
 double dotProduct(Vector* v, Vector* w) {
     if (!sameVectorLen(v, w)) {
-        printf("ERRO: Vetores de tamanhos diferentes.\n");
+        printf("ERROR (dotProduct): Different size Vectors\n");
         return NAN;
     }   
 

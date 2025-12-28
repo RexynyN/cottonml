@@ -3,8 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include <string.h>
 
+
+// Function Typedefs for quotients
+typedef double (*QuotientFunc) (double); 
+typedef double (*PartialQuotientFunc) (Vector*);
 
 typedef const double* Tuple2;
 
@@ -12,9 +17,13 @@ Tuple2 createTuple2(double a, double b) {
     return (const double[]) { a, b };
 }
 
+// Creates a number from 0 to 1
 double randDouble() {
-    // Creates a number from 0 to 1
     return (double)rand() / (double)RAND_MAX;
+}
+
+double randDoubleBetween(double min, double max) {
+    return min + randDouble() * (max - min);
 }
 
 double* createDoubleArray(size_t len) {
@@ -178,6 +187,7 @@ Vector mode(Vector* v) {
     return _vector_from_array(finalModes, arrLen);
 }
 
+
 double dataRange(Vector* v) {
     return max(v) - min(v); 
 }
@@ -231,7 +241,7 @@ double correlation(Vector* xs, Vector* ys) {
     double stdev_y = standardDeviation(ys);
 
     if (stdev_x > 0 && stdev_y > 0) {
-        return covariance(xs, ys) / stdev_x / stdev_y;
+        return (covariance(xs, ys) / stdev_x) / stdev_y;
     }
     return 0; // If no variation, correlation is zero
 }
@@ -264,9 +274,9 @@ double normalCdf(double x, double mu, double sigma) {
 }
     
 double inverseNormalCdf(double p, double mu, double sigma, double tolerance) {
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
-    if (tolerance == NAN) tolerance = 0.00001;
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
+    if (isnan(tolerance)) tolerance = 0.00001;
     
     // If not standard, compute standard and rescale
     if (mu != 0 || sigma != 1) {
@@ -307,50 +317,49 @@ Tuple2 normalApproximationToBinomial(int n, double p) {
 }
 
 double normalProbabilityAbove(double lo, double mu, double sigma){
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
 
     return 1 - normalCdf(lo, mu, sigma);
 }
 
 double normalProbabilityBelow(double lo, double mu, double sigma){
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
 
     return normalCdf(lo, mu, sigma);
 }
 
 double normalProbabilityBetween(double lo, double hi, double mu, double sigma) {
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
 
     return normalCdf(hi, mu, sigma) - normalCdf(lo, mu, sigma);
 }
 double normalProbabilityOutside(double lo, double hi, double mu, double sigma) {
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
 
     return 1 - normalProbabilityBetween(lo, hi, mu, sigma);
 }
 
-
 double normalUpperBound(double probability, double mu, double sigma) {
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
 
     return inverseNormalCdf(probability, mu, sigma, NAN);
 }
 
 double normalLowerBound(double probability, double mu, double sigma) {
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
 
     return inverseNormalCdf(1- probability, mu, sigma, NAN);
 }
 
-Tuple2 normalLowerBound(double probability, double mu, double sigma) {
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
+Tuple2 normalTwoSidedBound(double probability, double mu, double sigma) {
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
 
     double tailProb = (1 - probability) / 2;
 
@@ -361,8 +370,8 @@ Tuple2 normalLowerBound(double probability, double mu, double sigma) {
 }
 
 double twoSidedPValue(double x, double mu, double sigma) {
-    if (mu == NAN) mu = 0;
-    if (sigma == NAN) sigma = 1;
+    if (isnan(mu)) mu = 0;
+    if (isnan(sigma)) sigma = 1;
 
     if (x >= mu)
         return 2 * normalProbabilityAbove(x, mu, sigma);
@@ -382,23 +391,136 @@ Tuple2 estimatedParameters(long N, long n) {
     return createTuple2(p, sigma);  
 }
 
+// =================================================================
+//                          Gradient Descent 
+// =================================================================
+
+double squared(double x) {
+    return x * x; 
+}
+
+// Poor man's derivative
+double differenceQuotient(QuotientFunc func, double x, double dx) {
+    if (isnan(dx))
+        dx = 1.0e-6;
+
+    return (func(x + dx) - func(x)) / dx;
+} 
+
+// Poor man's partial derivative
+double partialDifferenceQuotient(PartialQuotientFunc func, Vector* v, int i, double dx) {
+    double data [v->len];
+    double increment = 0;
+    for(size_t j = 0; j < v->len; j++) {
+        increment = i == j ? dx : 0; 
+
+        data[j] = v->data[j] + increment;
+    }
+
+    Vector vec = createVector(data);
+    return (func(&vec) - func(v)) / dx;
+}
+
+Vector estimateGradient(PartialQuotientFunc func, Vector* v, double dx) {
+    if (isnan(dx))
+        dx = 1.0e-6;
+
+    double data [v->len];
+    for(size_t j = 0; j < v->len; j++) {
+        partialDifferenceQuotient(func, v, j, dx);
+    }
+
+    return createVector(data);
+}
+
+Vector gradientStep(Vector* v, Vector* gradient, double stepSize) {
+    if (!sameVectorLen(v, gradient)) {
+        printf("ERROR (gradientStep): Different size Vectors\n");
+        return (Vector) {};
+    }
+
+    Vector step = scalarMultiplyVector(stepSize, gradient);
+    return addVector(v, &step);
+}
+
+Vector sumOfSquaresGradient(Vector* v) {
+    double * new_data = createDoubleArray(v->len); 
+    for(size_t i = 0; i < v->len; i++) {
+        new_data[i] = v->data[i] * 2; 
+    }
+
+    Vector res; 
+    res.data = new_data; 
+    res.len = v->len;
+    return res;
+}
+
+Vector linearGradient(double x, double y, Tuple2 theta) {
+    srand(time(NULL));
+
+    double slope = theta[0];
+    double intercept = theta[1];
+
+    double predicted = (slope * x) + intercept;
+    double error = predicted - y; 
+
+    double data [2] = {(2 * error * x), (2 * error)};
+    return createVector(data);
+}
+
 int main() {
-    double a_data[] = { 1.0, 2.0, 3.0, 3.0, 4.0, 2.0, 4.0, 7.0 };
-    Vector a = createVector(a_data);
+    srand(time(NULL)); // For random reasons
 
-    Vector mod = mode(&a);
-    print_vector(mod);
+    // double v_data[] = { -10, 0, 10 };
+    // Vector v = createVector(v_data);
 
-    print_vector(deMean(&a));
+    // for (int epoch = 0; epoch < 1000; epoch++) {
+    //     Vector grad = sumOfSquaresGradient(&v);
+    //     v = gradientStep(&v, &grad, -0.01);
+    //     printf("%d -> ", epoch);
+    //     print_vector(v);
+    // }
+    // print_vector(v);
 
-    Vector dmena = deMean(&a);
-    printf("%.1f\n", mean(&dmena)); // Holy, it is really zero!
-    printf("%.1f\n", mean(&a));
-    printf("%.1f\n", standardDeviation(&a));
-    printf("%.1f\n", quantile(&a, 0.25));
-    printf("%.1f\n", median(&a));
-    printf("%f\n", normalPdf(3.5, 0, 1));
-    printf("%f\n", normalCdf(3.5, 0, 1));
+    double inp_data [106]; 
+    for(size_t i = -50; i < 50; i++) {
+    	inpu
+    } 
+
+    double data [2] = { randDoubleBetween(-1, 1), randDoubleBetween(-1, 1) };
+    Vector theta = createVector(data);
+    double learning_rate = 0.001;
+
+
+    for (int epoch = 0; epoch < 5000; epoch++) {
+        Vector grad =     
+
+        vector
+    }
+for epoch in range(5000):
+grad = vector_mean([linear_gradient(x, y, theta) for x, y in inputs])
+# Take a step in that direction
+theta = gradient_step(theta, grad, -learning_rate)
+print(epoch, theta)
+
+
+
+
+
+    // double a_data[] = { 1.0, 2.0, 3.0, 3.0, 4.0, 2.0, 4.0, 7.0 };
+    // Vector a = createVector(a_data);
+    // Vector mod = mode(&a);
+    // print_vector(mod);
+    // print_vector(deMean(&a));
+
+    // Vector dmena = deMean(&a);
+    // printf("%.1f\n", mean(&dmena)); // Holy, it is really zero!
+    // printf("%.1f\n", mean(&a));
+    // printf("%.1f\n", standardDeviation(&a));
+    // printf("%.1f\n", quantile(&a, 0.25));
+    // printf("%.1f\n", median(&a));
+    // printf("%f\n", normalPdf(3.5, 0, 1));
+    // printf("%f\n", differenceQuotient(&squared, 10, NAN));
 
     // double b_data[] = { 1.0, 2.0, 3.0 };
     // Vector b = createVector(b_data);
