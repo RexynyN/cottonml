@@ -482,9 +482,10 @@ int main() {
     // }
     // print_vector(v);
 
-    double inp_data [106]; 
+    double inp_data [106][2]; 
     for(size_t i = -50; i < 50; i++) {
-    	inpu
+    	inp_data[i][0] = i;
+    	inp_data[i][1] = 20 * i + 5;
     } 
 
     double data [2] = { randDoubleBetween(-1, 1), randDoubleBetween(-1, 1) };
@@ -493,15 +494,21 @@ int main() {
 
 
     for (int epoch = 0; epoch < 5000; epoch++) {
+        vectorMean(				
+    	for(size_t i = -50; i < 50; i++) {
+		
+            printf("Breno\n");    
+        }
+
         Vector grad =     
 
         vector
     }
-for epoch in range(5000):
-grad = vector_mean([linear_gradient(x, y, theta) for x, y in inputs])
-# Take a step in that direction
-theta = gradient_step(theta, grad, -learning_rate)
-print(epoch, theta)
+    for epoch in range(5000):
+        grad = vector_mean([linear_gradient(x, y, theta) for x, y in inputs])
+    	# Take a step in that direction
+	    theta = gradient_step(theta, grad, -learning_rate)
+        print(epoch, theta)
 
 
 
