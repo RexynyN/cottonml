@@ -15,7 +15,10 @@ typedef struct Matrix {
     size_t columns;
 } Matrix;
 
+
 // ============================= FUNÇÕES AUXILIARES =============================
+Vector matrixGetRow(Matrix* mat, size_t row);
+Vector matrixGetColumn(Matrix* mat, size_t col);
 Vector _vector_from_array(double* data, size_t len);
 Matrix _matrix_from_vectors(Vector* vecs, size_t len, size_t vecLen);
 Matrix _matrix_from_double(double** doubles, size_t len, size_t vecLen);
@@ -26,6 +29,7 @@ int _validate_matrix_data(double** data, size_t rows, size_t columns);
 #define createVector(arr) _vector_from_array(arr, sizeof(arr) / sizeof(arr[0]))
 #define createMatrix(vec) _matrix_from_double(vec, sizeof(vec) / sizeof(vec[0]), sizeof(vec[0]) / sizeof(vec[0][0])) 
 #define createMatrixVector(vec) (_validate_matrix_vectors(vec, sizeof(vec) / sizeof(vec[0])) ? _matrix_from_vectors(vec, sizeof(vec) / sizeof(vec[0]), (vec[0]).len) : (Matrix){0})
+#define POW2(x) x * x
 
 // ============================= OPERAÇÕES DE VETOR =============================
 int sameVectorLen(Vector* v, Vector* w);

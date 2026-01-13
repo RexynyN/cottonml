@@ -1,4 +1,5 @@
 #include "linearalg.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -69,6 +70,26 @@ int _validate_matrix_vectors(Vector* vecs, size_t len) {
     }
     return 1;
 }
+
+
+Vector matrixGetRow(Matrix* mat, size_t row) {
+    double* new_data = ALLOC_ARRAY(new_data, mat->columns);
+    for (size_t i = 0; i < mat->columns; i++){
+        new_data[i] = mat->data[row][i];
+    }
+    
+    return _vector_from_array(new_data, mat->columns);
+}
+
+Vector matrixGetColumn(Matrix* mat, size_t col) {
+    double* new_data = ALLOC_ARRAY(new_data, mat->rows);
+    for (size_t i = 0; i < mat->rows; i++){
+        new_data[i] = mat->data[i][col];
+    }
+    
+    return _vector_from_array(new_data, mat->rows);
+}
+
 
 #define createVector(arr) _vector_from_array(arr, sizeof(arr) / sizeof(arr[0]))
 #define createMatrix(vec) _matrix_from_double(vec, sizeof(vec) / sizeof(vec[0]), sizeof(vec[0]) / sizeof(vec[0][0])) 

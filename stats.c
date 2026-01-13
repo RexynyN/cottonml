@@ -6,6 +6,8 @@
 #include <time.h>
 #include <string.h>
 
+#define ALLOC_ARRAY(x, alloc) (x) = xmalloc(st_mult(sizeof(*(x)), (alloc)))
+
 
 // Function Typedefs for quotients
 typedef double (*QuotientFunc) (double); 
@@ -468,100 +470,100 @@ Vector linearGradient(double x, double y, Tuple2 theta) {
     return createVector(data);
 }
 
-int main() {
-    srand(time(NULL)); // For random reasons
+// int main() {
+//     srand(time(NULL)); // For random reasons
 
-    // double v_data[] = { -10, 0, 10 };
-    // Vector v = createVector(v_data);
+//     // double v_data[] = { -10, 0, 10 };
+//     // Vector v = createVector(v_data);
 
-    // for (int epoch = 0; epoch < 1000; epoch++) {
-    //     Vector grad = sumOfSquaresGradient(&v);
-    //     v = gradientStep(&v, &grad, -0.01);
-    //     printf("%d -> ", epoch);
-    //     print_vector(v);
-    // }
-    // print_vector(v);
+//     // for (int epoch = 0; epoch < 1000; epoch++) {
+//     //     Vector grad = sumOfSquaresGradient(&v);
+//     //     v = gradientStep(&v, &grad, -0.01);
+//     //     printf("%d -> ", epoch);
+//     //     print_vector(v);
+//     // }
+//     // print_vector(v);
 
-    double inp_data [106][2]; 
-    for(size_t i = -50; i < 50; i++) {
-    	inp_data[i][0] = i;
-    	inp_data[i][1] = 20 * i + 5;
-    } 
+//     double inp_data [106][2]; 
+//     for(size_t i = -50; i < 50; i++) {
+//     	inp_data[i][0] = i;
+//     	inp_data[i][1] = 20 * i + 5;
+//     } 
 
-    double data [2] = { randDoubleBetween(-1, 1), randDoubleBetween(-1, 1) };
-    Vector theta = createVector(data);
-    double learning_rate = 0.001;
+//     double data [2] = { randDoubleBetween(-1, 1), randDoubleBetween(-1, 1) };
+//     Vector theta = createVector(data);
+//     double learning_rate = 0.001;
 
 
-    for (int epoch = 0; epoch < 5000; epoch++) {
-        vectorMean(				
-    	for(size_t i = -50; i < 50; i++) {
+//     for (int epoch = 0; epoch < 5000; epoch++) {
+//         vectorMean(				
+//     	for(size_t i = -50; i < 50; i++) {
 		
-            printf("Breno\n");    
-        }
+//             printf("Breno\n");    
+//         }
 
-        Vector grad =     
+//         Vector grad =     
 
-        vector
-    }
-    for epoch in range(5000):
-        grad = vector_mean([linear_gradient(x, y, theta) for x, y in inputs])
-    	# Take a step in that direction
-	    theta = gradient_step(theta, grad, -learning_rate)
-        print(epoch, theta)
-
-
+//         vector
+//     }
+//     for epoch in range(5000):
+//         grad = vector_mean([linear_gradient(x, y, theta) for x, y in inputs])
+//     	# Take a step in that direction
+// 	    theta = gradient_step(theta, grad, -learning_rate)
+//         print(epoch, theta)
 
 
 
-    // double a_data[] = { 1.0, 2.0, 3.0, 3.0, 4.0, 2.0, 4.0, 7.0 };
-    // Vector a = createVector(a_data);
-    // Vector mod = mode(&a);
-    // print_vector(mod);
-    // print_vector(deMean(&a));
-
-    // Vector dmena = deMean(&a);
-    // printf("%.1f\n", mean(&dmena)); // Holy, it is really zero!
-    // printf("%.1f\n", mean(&a));
-    // printf("%.1f\n", standardDeviation(&a));
-    // printf("%.1f\n", quantile(&a, 0.25));
-    // printf("%.1f\n", median(&a));
-    // printf("%f\n", normalPdf(3.5, 0, 1));
-    // printf("%f\n", differenceQuotient(&squared, 10, NAN));
-
-    // double b_data[] = { 1.0, 2.0, 3.0 };
-    // Vector b = createVector(b_data);
 
 
-    // printf("--- Teste 1 ---\n");
-    // Vector vectors1[] = { a, b };
-    // Matrix m1 = createMatrixVector(vectors1);
-    // Vector v = vectorSum(&m1);
+//     // double a_data[] = { 1.0, 2.0, 3.0, 3.0, 4.0, 2.0, 4.0, 7.0 };
+//     // Vector a = createVector(a_data);
+//     // Vector mod = mode(&a);
+//     // print_vector(mod);
+//     // print_vector(deMean(&a));
 
-    // double c_data[] = { 1.0, 2.0, 3.0 };
-    // Vector c = createVector(c_data);
+//     // Vector dmena = deMean(&a);
+//     // printf("%.1f\n", mean(&dmena)); // Holy, it is really zero!
+//     // printf("%.1f\n", mean(&a));
+//     // printf("%.1f\n", standardDeviation(&a));
+//     // printf("%.1f\n", quantile(&a, 0.25));
+//     // printf("%.1f\n", median(&a));
+//     // printf("%f\n", normalPdf(3.5, 0, 1));
+//     // printf("%f\n", differenceQuotient(&squared, 10, NAN));
+
+//     // double b_data[] = { 1.0, 2.0, 3.0 };
+//     // Vector b = createVector(b_data);
+
+
+//     // printf("--- Teste 1 ---\n");
+//     // Vector vectors1[] = { a, b };
+//     // Matrix m1 = createMatrixVector(vectors1);
+//     // Vector v = vectorSum(&m1);
+
+//     // double c_data[] = { 1.0, 2.0, 3.0 };
+//     // Vector c = createVector(c_data);
     
-    // double d_data[] = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-    // Vector d = createVector(d_data);
+//     // double d_data[] = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+//     // Vector d = createVector(d_data);
 
-    // printf("\n--- Teste 2 ---\n");
-    // Vector vectors2[] = { c, d };
-    // Matrix m2 = createMatrixVector(vectors2);
-    // vectorSum(&m2);
+//     // printf("\n--- Teste 2 ---\n");
+//     // Vector vectors2[] = { c, d };
+//     // Matrix m2 = createMatrixVector(vectors2);
+//     // vectorSum(&m2);
 
-    // print_vector(v);
-
-
-    // double dot = dotProduct(&a, &b);
-    // printf("\n%.1f\n", dot);
-
-    // dot = sumOfSquares(&a);
-    // printf("%.1f\n", dot);
+//     // print_vector(v);
 
 
-    // Vector vm = getColumn(&m1, 1);
-    // print_vector(vm);
+//     // double dot = dotProduct(&a, &b);
+//     // printf("\n%.1f\n", dot);
 
-    return 0;
+//     // dot = sumOfSquares(&a);
+//     // printf("%.1f\n", dot);
 
-}
+
+//     // Vector vm = getColumn(&m1, 1);
+//     // print_vector(vm);
+
+//     return 0;
+
+// }
