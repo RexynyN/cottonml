@@ -76,3 +76,36 @@ static struct PyModuleDef fastmathmodule = {
 PyMODINIT_FUNC PyInit_fastmath(void) {
     return PyModule_Create(&fastmathmodule);
 }
+
+
+// Fread
+#include <stdio.h>
+
+typedef struct {
+    int id;
+    char nome[50];
+} Registro;
+
+int main() {
+    FILE *arquivo;
+    Registro reg;
+    size_t lidos;
+
+    arquivo = fopen("dados.bin", "rb"); // Abre arquivo binário para leitura
+    if (arquivo == NULL) {
+        perror("Erro ao abrir o arquivo");
+        return 1;
+    }
+
+    // Lê um registro do arquivo
+    lidos = fread(&reg, sizeof(Registro), 1, arquivo);
+
+    if (lidos == 1) {
+        printf("ID: %d, Nome: %s\n", reg.id, reg.nome);
+    } else {
+        printf("Não foi possível ler o registro.\n");
+    }
+
+    fclose(arquivo);
+    return 0;
+}

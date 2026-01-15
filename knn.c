@@ -74,3 +74,11 @@ double knnClassify(KNN* model, Vector* newPoint) {
     return majorityVote(&kLabels);
 }
 
+// int main() {
+    
+    
+    
+//     KNN model; 
+    
+    
+// }

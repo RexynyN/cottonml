@@ -139,68 +139,68 @@ Counter counterFromVector(Vector* vec) {
 
 
 
-int main() {
-    double data[] = {1.0, 3.0, 4.0, 5.0, 1.0, 1.0, 2.0, 3.0, 10.0, 3.0, 11.0};
-    Counter counter = counterFromArray(data);
+// int main() {
+//     double data[] = {1.0, 3.0, 4.0, 5.0, 1.0, 1.0, 2.0, 3.0, 10.0, 3.0, 11.0};
+//     Counter counter = counterFromArray(data);
 
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 5.0);
-    // counterAdd(&counter, 5.0);
-    // counterAdd(&counter, 5.0);
-    // counterAdd(&counter, 5.0);
-    // counterAdd(&counter, 5.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 1.0);
-    // counterAdd(&counter, 112.0);
-    // counterAdd(&counter, 12.0);
-    // counterAdd(&counter, 12.0);
-    // counterAdd(&counter, 12.0);
-    // counterAdd(&counter, 12.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 5.0);
+//     // counterAdd(&counter, 5.0);
+//     // counterAdd(&counter, 5.0);
+//     // counterAdd(&counter, 5.0);
+//     // counterAdd(&counter, 5.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 1.0);
+//     // counterAdd(&counter, 112.0);
+//     // counterAdd(&counter, 12.0);
+//     // counterAdd(&counter, 12.0);
+//     // counterAdd(&counter, 12.0);
+//     // counterAdd(&counter, 12.0);
 
-    CounterResult bigs = counterMostCommon(&counter, 30);
-    for (size_t i = 0; i < bigs.size; i++){
-        printf("%f -> %d\n", bigs.data[i].label, bigs.data[i].count);
-    }
+//     CounterResult bigs = counterMostCommon(&counter, 30);
+//     for (size_t i = 0; i < bigs.size; i++){
+//         printf("%f -> %d\n", bigs.data[i].label, bigs.data[i].count);
+//     }
     
-}
+// }
