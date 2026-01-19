@@ -4,14 +4,24 @@
 #include "linearalg.h"
 #include "utils.h"
 
+
 // Sorting comparing function for descending sorting
 static int __cnt_cmp_sort(const void* ptrA, const void* ptrB) {
     const CounterItem *ci1 = (const CounterItem*) ptrA;
     const CounterItem *ci2 = (const CounterItem*) ptrB;
 
-    // Descending order
-    return (ci2->count - ci1->count);
-}   
+    // Descending order by count
+    int diff = (ci2->count - ci1->count);
+    if (diff == 0) { // If the count is the same, order the labels ascending
+        if (ci1->label < ci2->label) 
+            return -1;
+        if (ci1->label > ci2->label) 
+            return 1;
+        return 0;
+    }
+
+    return diff;
+}
 
 // Get the index of a value inside the counter
 static size_t __cnt_val_index(Counter* cnt, double val) {
@@ -137,66 +147,64 @@ Counter counterFromVector(Vector* vec) {
 }
 
 
-
-
 // int main() {
 //     double data[] = {1.0, 3.0, 4.0, 5.0, 1.0, 1.0, 2.0, 3.0, 10.0, 3.0, 11.0};
 //     Counter counter = counterFromArray(data);
 
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 5.0);
-//     // counterAdd(&counter, 5.0);
-//     // counterAdd(&counter, 5.0);
-//     // counterAdd(&counter, 5.0);
-//     // counterAdd(&counter, 5.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 1.0);
-//     // counterAdd(&counter, 112.0);
-//     // counterAdd(&counter, 12.0);
-//     // counterAdd(&counter, 12.0);
-//     // counterAdd(&counter, 12.0);
-//     // counterAdd(&counter, 12.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 5.0);
+//     counterAdd(&counter, 5.0);
+//     counterAdd(&counter, 5.0);
+//     counterAdd(&counter, 5.0);
+//     counterAdd(&counter, 5.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 1.0);
+//     counterAdd(&counter, 112.0);
+//     counterAdd(&counter, 12.0);
+//     counterAdd(&counter, 12.0);
+//     counterAdd(&counter, 12.0);
+//     counterAdd(&counter, 12.0);
 
 //     CounterResult bigs = counterMostCommon(&counter, 30);
 //     for (size_t i = 0; i < bigs.size; i++){
