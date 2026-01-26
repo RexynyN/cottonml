@@ -3,18 +3,28 @@
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
-// #include "linearalg.h"
 
+#include "linearalg.h"
 #include "utils.h"
 
 #define FREAD_BUFFER 65536
 
-typedef struct CSVFile {
-    char* filename; 
-    size_t lineCount;
-    char separator;
-    int hasHeader;
-} CSVFile; 
+
+void printDataset(Dataset *dataset) {
+    printf("Dataset Features (%zu rows, %zu columns):\n", dataset->features.rows, dataset->features.columns);
+    for (size_t i = 0; i < dataset->features.rows; i++) {
+        for (size_t j = 0; j < dataset->features.columns; j++) {
+            printf("%.2f ", dataset->features.data[i][j]);
+        }
+        printf("\n");
+    }
+    
+    printf("Dataset Targets (%zu elements):\n", dataset->targets.len);
+    for (size_t i = 0; i < dataset->targets.len; i++) {
+        printf("%.2f ", dataset->targets.data[i]);
+    }
+    printf("\n");
+}
 
 size_t st_mult(size_t a, size_t b) {
     if (a > ULONG_MAX / b) {
@@ -25,11 +35,7 @@ size_t st_mult(size_t a, size_t b) {
     return a * b;
 }
 
-// static Vector parseCSVLine() {
-//     return (Vector) {};
-// }
-
-
+// Gets the line count of a file and the FILE* pointer set to the start
 size_t countFileLines(FILE* file) {
     fseek(file, 0, SEEK_SET); // Set to the start of the file
     char *stringBuffer = ALLOC_ARRAY(stringBuffer, FREAD_BUFFER);
@@ -53,23 +59,57 @@ size_t countFileLines(FILE* file) {
     return counter;
 }
 
+
+// Gets the column count of a CSV and returns the FILE* pointer set to the start
+size_t csvCountColumns(FILE* csvFile, char sep) {
+    char *stringBuffer = ALLOC_ARRAY(stringBuffer, FREAD_BUFFER);
+    int scanned = fread(stringBuffer, sizeof(char), FREAD_BUFFER, csvFile);
+    size_t cols = 0; 
+    for (size_t i = 0; i < scanned; i++) {
+        if (stringBuffer[i] == sep)
+            cols++;
+
+        if (stringBuffer[i] == '\n') {
+            for(;;) { // Line ends, but the last item may or may not have the separator, which misses 1 column
+                if (stringBuffer[i] == sep) 
+                    break; 
+                
+                if (!isspace(stringBuffer[i]) && stringBuffer[i] != sep){
+                    cols++;
+                    break;
+                }
+                i--;
+            } 
+            break;
+        }
+    }
+
+    free(stringBuffer);
+    fseek(csvFile, 0, SEEK_SET); // Set to the start of the file
+    return cols;
+}
+
 CSVFile createCSV(char* path, char separator, int hasHeader) {
     CSVFile csv; 
-    csv.filename = path; 
-    csv.separator = separator; 
+    csv.filename = path;     
     csv.hasHeader = hasHeader;
+    csv.separator = separator;
 
     FILE* csvfile = fopen(path, "r");
     if (csvfile == NULL) {
         printf("ERROR: The CSV path %s could not be opened! Check if the file exists.", csv.filename);
         exit(1);
-    }   
+    }
 
-    csv.lineCount = countFileLines(csvfile);
+
+    size_t lines = countFileLines(csvfile);
+    csv.rows = hasHeader ? lines - 1 : lines;
+    csv.columns = csvCountColumns(csvfile, csv.separator);
     fclose(csvfile);
-
-    return csv; 
+    return csv;
 }
+
+
 
 char* readFileToString(char* path){
     FILE *file = fopen(path, "r");
@@ -100,108 +140,139 @@ char* readFileToString(char* path){
         if(feof(file))
             break; 
     }
+
     fclose(file);
+    free(stringBuffer);
     entireFuckingFile[entireIdx] = '\0';
     return entireFuckingFile;  
 }
 
-// // Read all the contents of .csv file and converts then to double-filled Matrix
-// void readCsvToMatrix(CSVFile csv){
-//     char *singleString, *stopPtr;
-//     if (csv.separator == NULL)
-//         csv.separator = ',';    
-
-//     FILE *csvFile = fopen(csv.filename, "r");
-//     if (csvFile == NULL) {
-//         printf("ERROR: The CSV path %s could not be opened! Check if the file exists.", csv.filename);
-//         exit(1);
-//     }
-
-//     // Get the file length in bytes
-//     fseek(csvFile, 0, SEEK_END);
-//     size_t fileLength = ftell(csvFile);
-//     fseek(csvFile, 0, SEEK_SET);
-
-//     char *entireFuckingFile = malloc(st_mult((fileLength + 1), sizeof(char))); // +1 for the null terminator "\0"
-//     char *stringBuffer = ALLOC_ARRAY(stringBuffer, FREAD_BUFFER);
-//     char *lineBuilder = ALLOC_ARRAY(stringBuffer, FREAD_BUFFER);
-
-//     int bytesRead = 0, scanned = 0;
-//     for(;;) {
-//         scanned = fread(stringBuffer, sizeof(char), FREAD_BUFFER, csvFile);
-        
-//         // Does the csv string treatment
-//         for (size_t i = 0; i < scanned; i++) {
-//             lineBuilder[i] = stringBuffer[i];
-//             if (stringBuffer[i] == '\n') {
-//                 // It completes a line, and parses it
-//                 parseLine(lineBuilder);
-//             }
-//         }
-
-
-//         // TODO: Get the logic behind when: 
-//         // - The buffer ends, and there's the end of the line missing
-//         //      -- Offset the memory with fseek and seek the rest of the line
-//         // - When line is actually longer than lineBuilder
-
-//         bytesRead += scanned;
-
-
-//         if(feof(csvFile))
-//             break; 
-
-//     }
-
-
-//     double result = strtod(singleString, &stopPtr);
-
-//     fclose(csvFile);
-//    // return (Matrix){};
-// }
-
-
-
-char* stringSplit(char* s) {
-
-}
-
-
-char* stringTrim(char* s) {
-    while (isspace((unsigned char)*s)) {
-        s++; // Trim leading whitespace
-    }
-
-    // If the string is all whitespace, s will point to the null terminator
-    if (*s == '\0')
-        return s;
-
-    // Trim trailing whitespace
-    char* end = s + strlen(s) - 1;
-    while (end >= s && isspace((unsigned char)*end)) {
-        *end = '\0'; // Overwrite with null terminator
-        end--;
-    }
-
-    return s; // String is modified in-place
-}
-
-int main() {
-    // Must use a mutable character array, not a string literal (which is read-only)
-    char str1[] = "   Hello, World!   ";
-    char str2[] = "\t  Another string with tabs and newlines\n";
-    char str3[] = "     "; // String with only spaces
-
-    printf("Original 1: '%s'\n", str1);
-    printf("Trimmed 1 : '%s'\n", trim(str1));
+Vector parseCsvLine(char* line, char sep, size_t size) {
+    size_t lineLen = strlen(line) + 1, linePointer = 0, doubleP =0;
+    char *newLine = ALLOC_ARRAY(newLine, lineLen);
+    double* new_data = ALLOC_ARRAY(new_data, size);
     
-    printf("\nOriginal 2: '%s'\n", str2);
-    printf("Trimmed 2 : '%s'\n", trim(str2));
+    for (size_t i = 0; i < lineLen; i++){
+        if(line[i] == sep || line[i] == '\0'){
+            newLine[linePointer] = '\0';
+            new_data[doubleP] = strtod(newLine, NULL);
 
-    printf("\nOriginal 3: '%s'\n", str3);
-    printf("Trimmed 3 : '%s'\n", trim(str3));
+            linePointer = 0; 
+            doubleP = doubleP == size - 1 ? doubleP : doubleP + 1; 
+            continue; 
+        }
+
+        newLine[linePointer] = line[i];
+        linePointer++;
+    }
+
+    free(newLine);
+    return _vector_from_array(new_data, size);
+}
+
+// Read all the contents of .csv file and converts then to double-filled Matrix
+Matrix readCsvToMatrix(CSVFile csv){
+    FILE *csvFile = fopen(csv.filename, "r");
+    if (csvFile == NULL) {
+        printf("ERROR: The CSV path %s could not be opened! Check if the file exists.", csv.filename);
+        exit(1);
+    }
+
+    char *stringBuffer = ALLOC_ARRAY(stringBuffer, FREAD_BUFFER);
+    char *lineBuilder = ALLOC_ARRAY(stringBuffer, FREAD_BUFFER + 1); // +1 for possible null terminator
+    int scanned = 0, bufPointer = 0;
+
+    if(csv.hasHeader) {
+        scanned = fread(stringBuffer, sizeof(char), FREAD_BUFFER, csvFile);
+        for (size_t i = 0; i < scanned; i++) {
+            if (stringBuffer[i] == '\n') {
+                fseek(csvFile, i + 1, SEEK_SET);
+                break;
+            }
+        }
+
+    }
+
+    Vector* vecs = malloc(st_mult(sizeof(Vector), csv.rows));
+    size_t idxVecs = 0; 
+    for(;;) {
+        scanned = fread(stringBuffer, sizeof(char), FREAD_BUFFER, csvFile);
+        // Does the csv string treatment
+        for (size_t i = 0; i < scanned; i++) {
+            lineBuilder[bufPointer] = stringBuffer[i];
+            bufPointer++;
+            if (stringBuffer[i] == '\n') {
+                lineBuilder[bufPointer] = '\0';
+                
+                // It completes a line, and parses it
+                Vector v = parseCsvLine(lineBuilder, csv.separator, csv.columns);
+                vecs[idxVecs] = v;
+                idxVecs++;
+                bufPointer = 0;
+            }
+        }
+
+        if(feof(csvFile))
+            break; 
+    }
 
 
-    printf(readFileToString("Iris.csv"));
+    fclose(csvFile);
+    free(stringBuffer);
+    free(lineBuilder);
+    return _matrix_from_vectors(vecs, csv.rows, csv.columns);   
+}
+
+// Read all the contents of .csv file and converts to a dataset 
+// @param targetCol  is the 0-indexed columns of label/regression metric of a model
+Dataset readCsvToDataset(CSVFile csv, int targetCol){
+    if (targetCol + 1 > csv.columns) {
+        printf("readCsvToDataset(): The target column is out of range\n");
+        exit(1);
+    }
+
+    Matrix mat = readCsvToMatrix(csv); 
+    Vector vec = matrixGetColumn(&mat, targetCol);
+
+    double** matNew = ALLOC_ARRAY(matNew, mat.rows);
+    for(size_t i = 0; i < mat.rows; i++) {
+        matNew[i] = (double*) malloc(sizeof(double) * (mat.columns - 1));
+        size_t newIdx = 0;
+        for(size_t j = 0; j < mat.columns; j++) {
+            if (j == targetCol) 
+                continue;
+            matNew[i][newIdx] = mat.data[i][j]; 
+            newIdx++;
+        }
+        free(mat.data[i]);
+    }
+
+
+    free(mat.data);
+    mat.data = matNew;
+    mat.columns = mat.columns - 1;
+
+    Dataset data; 
+    data.targets = vec; 
+    data.features = mat;
+
+    return data; 
+}
+
+#include "knn.h"
+int main(){
+    // printf(readFileToString("Iris_only_numbers_no_header.csv"));
+    CSVFile irisDataset = createCSV("Iris_hot_encoded.csv", ',', 1);
+    Dataset m = readCsvToDataset(irisDataset, 4);
+
+    // printDataset(&m);
+    KNN knnModel = createKNNModel(m, 7, KNN_DIST_MINKOWSKI);
+
+    // 6.3,3.4,5.6,2.4,2
+    double d_data[] = {6.3,3.4,5.6,2.4};
+    Vector new = createVector(d_data);
+
+    printf("Class: %f\n", knnClassify(&knnModel, &new));
+    
     return 0;
 }

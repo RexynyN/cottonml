@@ -1,17 +1,28 @@
 #include <stdlib.h>
 #include <stdio.h> 
 #include <float.h>
+
 #include "utils.h"
 #include "counter.h"
 #include "linearalg.h"
+#include "knn.h"
 
+static KNNDistanceFunc funcsKNN[] = {
+    euclidianDistance,
+    manhattanDistance,
+    minkowskiDistance,
+    cosineDistance,
+    hammingDistance
+};
 
-typedef struct KNN {
-    Matrix data;
-    Vector labels; 
-    int kNeighbors; 
-} KNN;
+KNN createKNNModel(Dataset data, int kNeighbors, enum KNNDistance dist) {
+    KNN model; 
+    model.data = data; 
+    model.kNeighbors = kNeighbors;
+    model.distance = funcsKNN[dist];
 
+    return model;
+}
 
 static double rawMajorityVote(Vector* labels) {
     Counter counter = counterFromVector(labels);
@@ -48,37 +59,33 @@ double knnClassify(KNN* model, Vector* newPoint) {
     Vector vec; 
 
     double* kNearest = ALLOC_ARRAY(kNearest, model->kNeighbors);
+    double* kLabels = ALLOC_ARRAY(kNearest, model->kNeighbors);
     // Initialize the array, for good measure
-    for (size_t i = 0; i < model->data.rows; i++)  kNearest[i] = high;
+    for (size_t i = 0; i < model->data.features.rows; i++)  kNearest[i] = high;
 
     // Will get the k-neighbors
-    for (size_t i = 0; i < model->data.rows; i++){
-        vec = matrixGetRow(&(model->data), i);
-        double dist = distance(&vec, newPoint);
+    for (size_t i = 0; i < model->data.features.rows; i++){
+        vec = matrixGetRow(&(model->data.features), i);
+        double dist = model->distance(&vec, newPoint);
 
         if (dist >= high) 
             continue; // Its not lower than any of the K-lowest neighbors
 
         kNearest[highIdx] = dist; // New value in K-nearest
+        kLabels[highIdx] = model->data.targets.data[i];
         
-        high = kNearest[0]; 
-        for (size_t i = 0; i < model->kNeighbors; i++){ // Gets the new ceiling variable
-            if (kNearest[i] > high) {
-                high = kNearest[i];
-                highIdx = i; 
+        high = kNearest[0];
+        highIdx = 0;
+        for (size_t j = 0; j < model->kNeighbors; j++){ // Gets the new ceiling variable
+            if (kNearest[j] > high) {
+                high = kNearest[j];
+                highIdx = j; 
             }
+            printf("%.2f,", kNearest[j]);
         }
+        printf(" - HIGH: %.2f - %zu\n", high, highIdx);
     }
 
-    Vector kLabels = _vector_from_array(kNearest, model->kNeighbors);
-    return majorityVote(&kLabels);
+    Vector _kLabels = _vector_from_array(kLabels, model->kNeighbors);
+    return majorityVote(&_kLabels);
 }
-
-// int main() {
-    
-    
-    
-//     KNN model; 
-    
-    
-// }

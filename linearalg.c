@@ -135,6 +135,20 @@ void print_vector(Vector v) {
     printf("]\n");
 }
 
+void print_matrix(Matrix m) {
+    if (m.data == NULL) {
+        printf("Matriz Vazia/Invalida\n");
+        return;
+    }
+    for (size_t i = 0; i < m.rows; i++) {
+        printf("[ ");
+        for (size_t j = 0; j < m.columns; j++) {
+            printf("%.1f ", m.data[i][j]);
+        }
+        printf("]\n");
+    }
+}
+
 Vector addVector(Vector* v, Vector*  w) {
     if (!sameVectorLen(v, w)) {
         printf("ERRO: Vetores de tamanhos diferentes.\n");
@@ -227,9 +241,63 @@ double squaredDistance(Vector* v, Vector* w) {
     return sumOfSquares(&subtracted);
 }
 
-double distance(Vector* v, Vector* w) {
+double euclidianDistance(Vector* v, Vector* w) {
     return sqrt(squaredDistance(v, w));
 }
+
+double manhattanDistance(Vector* v, Vector* w) {
+    if (!sameVectorLen(v, w)) {
+        printf("ERROR (manhattanDistance): Different size Vectors\n");
+        return NAN;
+    }   
+
+    double distance = 0.0; 
+    for(size_t i = 0; i < v->len; i++) {
+        distance += fabs(v->data[i] - v->data[i]);
+    }
+
+    return distance;
+}
+
+double minkowskiDistance(Vector* v, Vector* w) {
+    if (!sameVectorLen(v, w)) {
+        printf("ERROR (manhattanDistance): Different size Vectors\n");
+        return NAN;
+    }   
+
+    double maxDiff = 0.0, diff = 0.0; 
+    for(size_t i = 0; i < v->len; i++) {
+        diff = fabs(v->data[i] - v->data[i]);
+
+        if(diff > maxDiff) {
+            maxDiff == diff;
+        }
+    }
+
+    return maxDiff;
+}
+
+double cosineDistance(Vector* v, Vector* w) {
+
+}
+
+// Uses the integer value of the doubles
+double hammingDistance(Vector* v, Vector* w) {
+        if (!sameVectorLen(v, w)) {
+        printf("ERROR (manhattanDistance): Different size Vectors\n");
+        return NAN;
+    }   
+
+    double mismatch = 0.0; 
+    for(size_t i = 0; i < v->len; i++) {
+        if( ((int)v->data[i]) != ((int)w->data[i])) {
+            mismatch++;
+        }
+    }
+
+    return mismatch;
+}
+
 
 
 // ============================= MATRIX FUNCTIONS =============================

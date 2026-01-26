@@ -34,6 +34,7 @@ int _validate_matrix_data(double** data, size_t rows, size_t columns);
 // ============================= OPERAÇÕES DE VETOR =============================
 int sameVectorLen(Vector* v, Vector* w);
 void print_vector(Vector v);
+void print_matrix(Matrix m);
 Vector addVector(Vector* v, Vector* w);
 Vector subtractVector(Vector* v, Vector* w);
 Vector scalarMultiplyVector(double scalar, Vector* v);
@@ -41,7 +42,15 @@ double dotProduct(Vector* v, Vector* w);
 double sumOfSquares(Vector* v);
 double vectorMagnitude(Vector* v);
 double squaredDistance(Vector* v, Vector* w);
-double distance(Vector* v, Vector* w);
+
+
+
+double euclidianDistance(Vector* v, Vector* w);
+double manhattanDistance(Vector* v, Vector* w);
+double minkowskiDistance(Vector* v, Vector* w);
+double cosineDistance(Vector* v, Vector* w);
+double hammingDistance(Vector* v, Vector* w);
+
 
 // Nova função para liberar memória
 void freeVector(Vector* v);
