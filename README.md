@@ -62,3 +62,21 @@ Used to compress data or find underlying structures.
 * **Anomaly Detection:** `IsolationForest`, `OneClassSVM`, `LocalOutlierFactor`.
 * **Semi-Supervised:** `LabelPropagation`, `SelfTrainingClassifier`.
 * **Multi-output:** `MultiOutputClassifier`, `RegressorChain`.
+
+
+
+# TODOs
+
+- CSV Parsing
+    - [x] Whole text Parsing
+    - [x] Parsing to Matrix 
+    - [x] Parsing to Dataset
+
+- KNN 
+    - [x] Naive Approach (Brute force - Distance Based)
+    - [x] Multiple distances implemented
+    - [ ] KD-Tree Implementation
+    - [ ] Ball Tree Implementation 
+
+- Naive Bayes 
+    - [ ] Simple Implementation

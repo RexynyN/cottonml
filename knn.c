@@ -3,6 +3,7 @@
 #include <float.h>
 
 #include "utils.h"
+#include "dataset.h"
 #include "counter.h"
 #include "linearalg.h"
 #include "knn.h"
@@ -51,6 +52,14 @@ static double majorityVote(Vector* labels) {
 
     Vector v = _vector_from_array(data, numWinners); 
     return majorityVote(&v);
+}
+
+double brenoIsThatIt() {
+    printf("Breno is that it?");
+    while (0) {
+        printf("You are not supposed to be here");
+    }
+    return 0.0;
 }
 
 double knnClassify(KNN* model, Vector* newPoint) {
