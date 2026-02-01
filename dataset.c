@@ -258,9 +258,29 @@ Dataset readCsvToDataset(CSVFile csv, int targetCol){
 }
 
 #include "knn.h"
-int main(){
-    
 
+
+#include <stdio.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <locale.h>
+
+void to_lowercase_unicode(wchar_t* str) {
+    // Set the locale to the user's default, which includes Unicode information
+    // If the specific locale is known (e.g., "en_US.UTF-8" or "C.UTF-8"), it can be used instead
+    setlocale(LC_ALL, ""); 
+
+    if (str == NULL) {
+        return;
+    }
+
+    for (int i = 0; str[i] != L'\0'; ++i) {
+        str[i] = towlower(str[i]);
+    }
+}
+
+
+int main(){
     // printf(readFileToString("Iris_only_numbers_no_header.csv"));
     // CSVFile irisDataset = createCSV("Iris_hot_encoded.csv", ',', 1);
 
@@ -279,18 +299,17 @@ int main(){
     // printf("Class: %f\n", knnClassify(&knnModel, &new));
 
 
-    // Standard UTF-8 string using char array
-    const char* utf8_str = "Uma k-d tree (árvore k-dimensional) é uma estrutura de dados de partição espacial usada para organizar pontos em um espaço K-dimensional"; 
-    printf("%s\n\n", utf8_str); // Works on most modern terminals
+
+    // Use wide string literal with L prefix
+    wchar_t unicode_string[] = L"HELLO WORLD! ÄÖÜ"; 
+
+    wprintf(L"Original string: %ls\n", unicode_string);
+
+    to_lowercase_unicode(unicode_string);
+
+    wprintf(L"Lowercase string: %ls\n", unicode_string);
 
 
-    char breno [512];
-    scanf("%s", breno);
-
-
-    if (strcmp(utf8_str, breno) == 0) {
-        printf("Skibidi\n");
-    }
 
     return 0;
 }

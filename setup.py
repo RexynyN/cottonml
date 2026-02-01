@@ -14,3 +14,8 @@ setup(
     description='Exemplo de extensao C para calculos estatisticos',
     ext_modules=[module]
 )
+
+
+
+
+str().count()
