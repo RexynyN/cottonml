@@ -6,13 +6,149 @@
 #include <unicode/ustdio.h>
 
 #include "utils.h"
-#include "cottonstring.h"
+#include "mlstrings.h"
+
+// 'casefold', 'center', 'count', 'encode', 
+// 'expandtabs', 'format', 'format_map', 'index', 
+// 'ljust', 'lstrip', 'maketrans', 'partition', 'removeprefix', 
+// 'removesuffix', 'replace', 'rfind', 'rindex', 'rjust', 'rpartition', 
+// 'rsplit', 'rstrip', 'swapcase', 
+// 'title', 'translate', 'zfill'
+
 
 void stringCheckError(UErrorCode status, const char* msg) {
     if (U_FAILURE(status)) {
         fprintf(stderr, "Erro ICU [%s]: %s\n", msg, u_errorName(status));
         exit(status);
     }
+}
+
+static int32_t _get_len(const string src) {
+    return (src == NULL) ? 0 : stringLen(src);
+}
+
+bool stringIsAlnum(const string src) {
+    int32_t len = _get_len(src);
+    if (len == 0) return false;
+    for (int32_t i = 0; i < len; i++) {
+        if (!u_isalnum(src[i])) return false;
+    }
+    return true;
+}
+
+bool stringIsAlpha(const string src) {
+    int32_t len = _get_len(src);
+    if (len == 0) return false;
+    for (int32_t i = 0; i < len; i++) {
+        if (!u_isalpha(src[i])) return false;
+    }
+    return true;
+}
+
+bool stringIsAscii(const string src) {
+    int32_t len = _get_len(src);
+    if (len == 0) return true; // No Python, string vazia é ASCII
+    for (int32_t i = 0; i < len; i++) {
+        if (src[i] > 0x7F) return false;
+    }
+    return true;
+}
+
+bool stringIsDecimal(const string src) {
+    int32_t len = _get_len(src);
+    if (len == 0) return false;
+    for (int32_t i = 0; i < len; i++) {
+        if (u_charType(src[i]) != U_DECIMAL_DIGIT_NUMBER) return false;
+    }
+    return true;
+}
+
+bool stringIsIdentifier(const string src) {
+    int32_t len = _get_len(src);
+    if (len == 0) return false;
+    // First character: Letter or Underline
+    if (!u_isIDStart(src[0]) && src[0] != (character)'_') return false;
+    // Rest: Letter, Number or Underline
+    for (int32_t i = 1; i < len; i++) {
+        if (!u_isIDPart(src[i]) && src[i] != (character)'_') return false;
+    }
+    return true;
+}
+
+bool stringIsLower(const string src) {
+    int32_t len = _get_len(src);
+    bool has_cased = false;
+    if (len == 0) return false;
+    for (int32_t i = 0; i < len; i++) {
+        if (u_isUAlphabetic(src[i])) { // Verifica se é uma letra
+            if (u_islower(src[i])) has_cased = true;
+            else if (u_isupper(src[i]) || u_istitle(src[i])) return false;
+        }
+    }
+    return has_cased;
+}
+
+bool stringIsNumeric(const string src) {
+    int32_t len = stringLen(src);
+    if (len == 0) return false;
+    for (int32_t i = 0; i < len; i++) {
+        if (u_getNumericValue(src[i]) == U_NO_NUMERIC_VALUE) return false;
+    }
+    return true;
+}
+
+bool stringIsPrintable(const string src) {
+    int32_t len = _get_len(src);
+    if (len == 0) return true;
+    for (int32_t i = 0; i < len; i++) {
+        if (!u_isprint(src[i]) && src[i] != (character)' ') return false;
+    }
+    return true;
+}
+
+bool stringIsSpace(const string src) {
+    int32_t len = _get_len(src);
+    if (len == 0) return false;
+    for (int32_t i = 0; i < len; i++) {
+        if (!u_isUWhiteSpace(src[i])) return false;
+    }
+    return true;
+}
+
+bool stringIsTitle(const string src) {
+    int32_t len = _get_len(src);
+    if (len == 0) return false;
+    bool cased = false;
+    bool previous_is_cased = false;
+
+    for (int32_t i = 0; i < len; i++) {
+        character c = src[i];
+        if (u_isupper(c) || u_istitle(c)) {
+            if (previous_is_cased) return false;
+            previous_is_cased = true;
+            cased = true;
+        } else if (u_islower(c)) {
+            if (!previous_is_cased) return false;
+            previous_is_cased = true;
+            cased = true;
+        } else {
+            previous_is_cased = false;
+        }
+    }
+    return cased;
+}
+
+bool stringIsUpper(const string src) {
+    int32_t len = _get_len(src);
+    bool has_cased = false;
+    if (len == 0) return false;
+    for (int32_t i = 0; i < len; i++) {
+        if (u_isUAlphabetic(src[i])) {
+            if (u_isupper(src[i])) has_cased = true;
+            else if (u_islower(src[i]) || u_istitle(src[i])) return false;
+        }
+    }
+    return has_cased;
 }
 
 string stringUpper(const string src) {
@@ -54,7 +190,6 @@ bool stringEquals(const string src1, const string src2){
     return u_strcmp(src1, src2) == 0; 
 }
 
-#define stringIsWhitespace(string) u_isUWhiteSpace(string)
 
 string stringStrip(const string src) {
     int32_t len = stringLen(src);
@@ -76,6 +211,7 @@ string stringStrip(const string src) {
     if (new_len > 0) {
         u_strncpy(dest, src + start, new_len);
     }
+
     dest[new_len] = 0;
     return dest;
 }
@@ -198,8 +334,6 @@ SplittedString stringSplitStr(const string src, const string sep) {
     return ss;
 }
 
-
-
 string stringJoin(const string* strings, size_t len, string joiner) {
     size_t stringLeng = 0; 
     for (size_t i = 0; i < len; i++)
@@ -231,27 +365,17 @@ string stringJoin(const string* strings, size_t len, string joiner) {
     return joinedString;
 }
 
-string charToString(const char* src) {
+string charToString(const char* input_utf8) {
     UErrorCode status = U_ZERO_ERROR;
     
-    int32_t src_capacity = strlen(src) * 2;
-    string src = ALLOC_ARRAY(src, src_capacity);
+    int32_t dest_capacity = strlen(input_utf8) + 1;
+    string dest = (string)malloc(dest_capacity * sizeof(character));
     
-    // Converte UTF-8 para UTF-16 (Padrão ICU)
-    u_strFromUTF8(src, src_capacity, NULL, src, -1, &status);
+    u_strFromUTF8(dest, dest_capacity, NULL, input_utf8, -1, &status);
     stringCheckError(status, "Conversão inicial");
 
-    return src;
+    return dest;
 }
-
-// 'casefold', 'center', 'count', 'encode', 
-// 'expandtabs', 'format', 'format_map', 'index', 'isalnum', 
-// 'isalpha', 'isascii', 'isdecimal', 'isdigit', 'isidentifier', 'islower', 
-// 'isnumeric', 'isprintable', 'isspace', 'istitle', 'isupper', 'join', 
-// 'ljust', 'lower', 'lstrip', 'maketrans', 'partition', 'removeprefix', 
-// 'removesuffix', 'replace', 'rfind', 'rindex', 'rjust', 'rpartition', 
-// 'rsplit', 'rstrip', 'splitlines', 'startswith', 'strip', 'swapcase', 
-// 'title', 'translate', 'upper', 'zfill'
 
 SplittedString stringSplitLines(const string src) {
     string newline = charToString("\n");
@@ -315,7 +439,7 @@ string stringSubstring(const string src, int start, int end) {
         new[strPointer] = src[i];
         strPointer++;
     }
-
+    
     new[(end - start) + 1] = 0; 
     return new; 
 }
@@ -375,26 +499,25 @@ bool stringIsDigit(const string src) {
 #define str(src) charToString(src)
 #define string(src) charToString(src)
 #define stringJoinChar(strings, len, joiner) stringJoin(strings, len, charToString(joiner))
-
+#define stringIsWhitespace(string) u_isUWhiteSpace(string)
 
 
 // gcc utils.c cottonstring.c -licuuc -licuio -o cottonml && ./cottonml
 int main() {
-    const char* src = "  Olá Mundo! Γειά σου κόσμε  ";
+    const char* raw_text = "  Olá Mundo! Γειά σου κόσμε  ";
 
-    string src = charToString(src);
+    // Renomeamos a variável da ICU para 'u_src' (Unicode Source)
+    string u_src = charToString(raw_text);
 
-    // Teste Lower
-    string lower = stringLower(src);
-    
-    // Teste Strip
-    string stripped = stringStrip(src);
+    // Agora use 'u_src' nos testes
+    string lower = stringLower(u_src);
+    string stripped = stringStrip(u_src);
 
-    string cap = stringCapitalize(src);
+    string cap = stringCapitalize(u_src);
 
     // Saída usando stdout da ICU
     UFILE* out = u_finit(stdout, NULL, NULL);
-    u_fprintf(out, "Original: [%S]\n", src);
+    u_fprintf(out, "Original: [%S]\n", u_src);
     u_fprintf(out, "Lower:    [%S]\n", lower);
     u_fprintf(out, "Strip:    [%S]\n", stripped);
     u_fprintf(out, "Capitalize:    [%S]\n", cap);
@@ -410,14 +533,14 @@ int main() {
     u_fprintf(out, "\t[%S]\n", joined);
 
     // Mundo! Γειά 
-    string substring = stringSubstring(stripped, -5, -2);
+    string substring = stringSubstring(stripped, -53, 0);
     u_fprintf(out, "\tSubstring: [%S]\n", substring);
 
     size_t counter = stringCount(str("asdiubngbrenoaiodnbrenobrenoasfbregahg"), str("breno"), -5, -2);
     printf("\tCounter: [%zu]\n", counter);
 
     // Limpeza
-    free(src);
+    free(u_src);
     free(lower);
     free(stripped);
     u_fclose(out);
