@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func main() {
-	fmt.Println("Welcome to the cottonml")
+	ReadCSV("Iris.csv")
 }
