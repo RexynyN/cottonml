@@ -15,8 +15,13 @@ type Vector struct {
 	dataType reflect.Type
 }
 
-type Matrix struct {
+type DataFrame struct {
 	Data      map[string]Vector
+	dataTypes map[string]reflect.Type
+}
+
+type Matrix struct {
+	Data      [][]any
 	dataTypes map[string]reflect.Type
 }
 
@@ -113,16 +118,15 @@ func ReadCSV(filename string) Dataset {
 	header := csvValues[0]
 	csvValues = csvValues[1:]
 
-
 	// Types treatment
-	dataTypes := guessDatasetTypes(csvValues[:math.Ceil(len(csvValues) * 0.05)]) // Samples 5% of dataset
+	dataTypes := guessDatasetTypes(csvValues[:math.Ceil(len(csvValues)*0.05)]) // Samples 5% of dataset
 	types := map[string]reflect.Type{}
 	for i := range len(header) {
 		types[header[i]] = TypeTranslate[dataTypes[i]]
 	}
 
 	// Put in the correct containers
-	var dummy any 
+	var dummy any
 	rows, cols := len(csvValues), len(csvValues[0])
 	matrixData := [][]Vector{}
 	for j := range cols { // cols
@@ -132,21 +136,13 @@ func ReadCSV(filename string) Dataset {
 		}
 
 		vec := Vector{
-			Data: vecData,
+			Data:     vecData,
 			dataType: TypeTranslate[dataTypes[j]],
 		}
 		matrixData = append(matrixData, vec)
 	}
 
-
-
-	
-
-
-
-	return Dataset{
-		dataTypes: 
-	}
+	return Dataset{}
 }
 
 func DatasetFromCSV(filename string, sep rune, hasHeader bool) Dataset {
