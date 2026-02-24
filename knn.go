@@ -1,6 +1,10 @@
 package main
 
-import "cottonml/utils"
+import (
+	"cottonml/utils"
+	"fmt"
+	"math"
+)
 
 type KNN struct {
 	KNeighbors   int
@@ -17,7 +21,7 @@ func (k *KNN) kdTreeKNNFit(x *Matrix) {
 
 }
 
-func rawMajorityVote(labels []any) any {
+func (k *KNN) rawMajorityVote(labels []any) any {
 	counter := utils.CounterFromSlice(labels)
 
 	result := counter.MostCommonOne()
@@ -25,7 +29,7 @@ func rawMajorityVote(labels []any) any {
 }
 
 // Weighted majority vote (Assumes that the labels are sorted by nearest to farthest)
-func majorityVote(labels []any) any {
+func (k *KNN) majorityVote(labels []any) any {
 	counter := utils.CounterFromSlice(labels)
 
 	items := counter.MostCommonItems()
@@ -34,17 +38,29 @@ func majorityVote(labels []any) any {
 	}
 
 	// Retry without the farthest item
-	return majorityVote(labels[:len(labels)-1])
+	return k.majorityVote(labels[:len(labels)-1])
 
 }
 
 func (k *KNN) bruteForceKNNFit(x *Matrix, y *Vector) {
+	high, highIdx := math.MaxFloat64, 0
+	for _, row := range x.Data {
+
+	}
 }
 
 func (k *KNN) Fit(x *Matrix, y *Vector) {
-
+	k.bruteForceKNNFit(x, y)
 }
 
 func (k *KNN) Predict(x *Matrix) {
 
+}
+
+func (k *KNN) brenoIsThatIt() {
+	fmt.Println("Breno, is that it?")
+	for {
+		fmt.Println("You are not supposed to be here")
+		fmt.Println("What are you doing here")
+	}
 }

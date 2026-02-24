@@ -10,42 +10,7 @@ import (
 	"strconv"
 )
 
-type Vector struct {
-	Data     []any
-	dataType reflect.Type
-}
-
-type DataFrame struct {
-	Data      map[string]Vector
-	dataTypes map[string]reflect.Type
-}
-
-type Matrix struct {
-	Data      [][]any
-	dataTypes map[string]reflect.Type
-}
-
-type Dataset struct {
-	Target Vector
-	Data   Matrix
-	Source string
-}
-
-var TypeTranslate = map[string]reflect.Type{
-	"int":    reflect.TypeOf(math.MaxInt),
-	"string": reflect.TypeOf("string"),
-	"bool":   reflect.TypeOf(true),
-	"float":  reflect.TypeOf(math.MaxFloat64),
-}
-
-func printMatrix(matrix [][]string) {
-	for _, record := range matrix {
-		fmt.Println(record, len(record))
-	}
-}
-
 func guessDatasetTypes(guessRows [][]string) []string {
-	printMatrix(guessRows)
 	rows, cols := len(guessRows), len(guessRows[0])
 
 	fmt.Println(rows, cols)
@@ -78,8 +43,6 @@ func guessDatasetTypes(guessRows [][]string) []string {
 
 		predicts = append(predicts, rowTypePredict)
 	}
-
-	printMatrix(predicts)
 
 	// Does a voting
 	choice, choiceCount, ballot := "", 0, make(map[string]int)
@@ -119,7 +82,8 @@ func ReadCSV(filename string) Dataset {
 	csvValues = csvValues[1:]
 
 	// Types treatment
-	dataTypes := guessDatasetTypes(csvValues[:math.Ceil(len(csvValues)*0.05)]) // Samples 5% of dataset
+	percentile5 := int(math.Ceil(float64(len(csvValues)) * 0.05))
+	dataTypes := guessDatasetTypes(csvValues[:percentile5]) // Samples 5% of dataset
 	types := map[string]reflect.Type{}
 	for i := range len(header) {
 		types[header[i]] = TypeTranslate[dataTypes[i]]
@@ -128,11 +92,12 @@ func ReadCSV(filename string) Dataset {
 	// Put in the correct containers
 	var dummy any
 	rows, cols := len(csvValues), len(csvValues[0])
-	matrixData := [][]Vector{}
+	matrixData := []Vector{}
 	for j := range cols { // cols
 		vecData := make([]any, rows)
 		for i := range rows { // rows
 			dummy = csvValues[i][j]
+			vecData = append(vecData, dummy)
 		}
 
 		vec := Vector{
