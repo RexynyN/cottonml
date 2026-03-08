@@ -13,7 +13,7 @@ var TypeTranslate = map[string]reflect.Type{
 }
 
 type Data interface {
-	int64 | float64 | string | bool
+	int | int32 | int64 | float32 | float64 | string | bool
 }
 
 type Number interface {
@@ -24,13 +24,17 @@ type Label interface {
 	int64 | float64 | string
 }
 
-type Vector struct {
+type Row struct {
 	Data     []any
 	dataType reflect.Type
 }
 
+type Vector[T Data] struct {
+	Data []T
+}
+
 type DataFrame struct {
-	Data      map[string]any
+	Data      map[string][]any
 	dataTypes map[string]reflect.Type
 }
 
@@ -40,7 +44,7 @@ type Matrix struct {
 }
 
 type Dataset struct {
-	Target Vector
+	Target Vector[string]
 	Data   Matrix
 	Source string
 }
@@ -86,6 +90,27 @@ func (m *Matrix) getColumnTransform(colIndex int, targetType reflect.Type) ([]an
 	}
 
 	return column, nil
+}
+
+func (d *DataFrame) AsFloat32(col string) {
+
+}
+
+func isInSlice[T Data](comp T, list []T) bool {
+	for _, value := range list {
+		if comp == value {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (d *DataFrame) AsFloat(col string, floatBase int) {
+	if isInSlice(floatBase, []int{32, 64}) {
+		panic("ERROR: the given size is not a valid float size. pick between 32 or 64.")
+	}
+
 }
 
 func main() {
