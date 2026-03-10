@@ -49,6 +49,23 @@ type Dataset struct {
 	Source string
 }
 
+func ColumnAsType[T Data](d *DataFrame, col string) {
+	data, ok := d.Data[col]
+	if !ok {
+		panic("ERROR: " + col + " is not a column in the DataFrame")
+	}
+
+	newData := make([]T, 0)
+	for idx, value := range data {
+		aux, ok := value.(T)
+		if !ok {
+			panic(fmt.Sprintf("ERROR: %a could not be converted to given type at index %d", value, idx))
+		}
+
+		newData = append(newData, aux)
+	}
+}
+
 func (m *Matrix) ToString() {
 	fmt.Println(len(m.Data), "x", len(m.Data[0]))
 	for _, record := range m.Data {
