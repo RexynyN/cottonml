@@ -1,8 +1,11 @@
 package utils
 
-import "sort"
+import (
+	"cottonml"
+	"sort"
+)
 
-type Counter struct {
+type Counter[T Label] struct {
 	values map[any]int
 }
 

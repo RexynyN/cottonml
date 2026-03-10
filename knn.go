@@ -6,22 +6,22 @@ import (
 	"math"
 )
 
-type KNN struct {
+type KNN[D Data, L Label] struct {
 	KNeighbors   int
 	DistanceFunc string
 	Approach     string
 }
 
-type knnPoint struct {
-	Point *Vector
-	Label any
+type knnPoint[T Data, L Label] struct {
+	Point *Vector[T]
+	Label []L
 }
 
-func (k *KNN) kdTreeKNNFit(x *Matrix) {
+func (k *KNN[D, L]) kdTreeKNNFit(x *Matrix[D], y *Vector[L]) {
 
 }
 
-func (k *KNN) rawMajorityVote(labels []any) any {
+func (k *KNN[D, L]) rawMajorityVote(labels Vector[D]) any {
 	counter := utils.CounterFromSlice(labels)
 
 	result := counter.MostCommonOne()
@@ -29,7 +29,7 @@ func (k *KNN) rawMajorityVote(labels []any) any {
 }
 
 // Weighted majority vote (Assumes that the labels are sorted by nearest to farthest)
-func (k *KNN) majorityVote(labels []any) any {
+func (k *KNN[D, L]) majorityVote(labels []L) any {
 	counter := utils.CounterFromSlice(labels)
 
 	items := counter.MostCommonItems()
@@ -42,25 +42,18 @@ func (k *KNN) majorityVote(labels []any) any {
 
 }
 
-func (k *KNN) bruteForceKNNFit(x *Matrix, y *Vector) {
+func (k *KNN[D, L]) bruteForceKNNFit(x *Matrix[D], y *Vector[L]) {
 	high, highIdx := math.MaxFloat64, 0
-	for _, row := range x.Data {
-
+	for _, row := range x {
+		fmt.Println(high, highIdx)
+		fmt.Println(row)
 	}
 }
 
-func (k *KNN) Fit(x *Matrix, y *Vector) {
+func (k *KNN[D, L]) Fit(x *Matrix[D], y *Vector[L]) {
 	k.bruteForceKNNFit(x, y)
 }
 
-func (k *KNN) Predict(x *Matrix) {
+func (k *KNN[D, L]) Predict(x *Matrix[D]) {
 
-}
-
-func (k *KNN) brenoIsThatIt() {
-	fmt.Println("Breno, is that it?")
-	for {
-		fmt.Println("You are not supposed to be here")
-		fmt.Println("What are you doing here")
-	}
 }

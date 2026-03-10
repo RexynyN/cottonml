@@ -13,11 +13,11 @@ var TypeTranslate = map[string]reflect.Type{
 }
 
 type Data interface {
-	int | int32 | int64 | float32 | float64 | string | bool
+	int | int8 | int16 | int32 | int64 | float32 | float64 | string | bool
 }
 
 type Number interface {
-	int64 | float64
+	int | int8 | int16 | int32 | int64 | float32 | float64
 }
 
 type Label interface {
@@ -29,41 +29,91 @@ type Row struct {
 	dataType reflect.Type
 }
 
-type Vector[T Data] struct {
-	Data []T
-}
+type Vector[T Data] []T
+
+type TypedDataFrame[T Data] map[string][]T
+
+type Matrix[T Data] [][]T
 
 type DataFrame struct {
 	Data      map[string][]any
 	dataTypes map[string]reflect.Type
 }
 
-type Matrix struct {
-	Data      [][]any
-	dataTypes []reflect.Type
-}
-
-type Dataset struct {
-	Target Vector[string]
-	Data   Matrix
-	Source string
-}
-
-func ColumnAsType[T Data](d *DataFrame, col string) {
+func ColumnAsType[T Data](d *DataFrame, col string) Vector[T] {
 	data, ok := d.Data[col]
 	if !ok {
 		panic("ERROR: " + col + " is not a column in the DataFrame")
 	}
 
-	newData := make([]T, 0)
+	vector := make(Vector[T], 0)
 	for idx, value := range data {
 		aux, ok := value.(T)
 		if !ok {
 			panic(fmt.Sprintf("ERROR: %a could not be converted to given type at index %d", value, idx))
 		}
 
-		newData = append(newData, aux)
+		vector = append(vector, aux)
 	}
+
+	return vector
+}
+
+func ToTypedDataFrame[T Data](d *DataFrame) TypedDataFrame[T] {
+	tData := make(TypedDataFrame[T])
+	for key, data := range d.Data {
+		newData := make([]T, 0)
+		for idx, value := range data {
+			newValue, ok := value.(T)
+			if !ok {
+				panic(fmt.Sprintf("ERROR: %a could not be converted to given type at column %s, index %d", value, key, idx))
+			}
+			newData = append(newData, newValue)
+		}
+		tData[key] = newData
+	}
+
+	return tData
+}
+
+func (d *DataFrame) AsFloat(col string) Vector[float64] {
+	return d.AsFloat64(col)
+}
+
+func (d *DataFrame) AsFloat32(col string) Vector[float32] {
+	return ColumnAsType[float32](d, col)
+}
+
+func (d *DataFrame) AsFloat64(col string) Vector[float64] {
+	return ColumnAsType[float64](d, col)
+}
+
+func (d *DataFrame) AsString(col string) Vector[string] {
+	return ColumnAsType[string](d, col)
+}
+
+func (d *DataFrame) AsInt(col string) Vector[int] {
+	return ColumnAsType[int](d, col)
+}
+
+func (d *DataFrame) AsInt8(col string) Vector[int8] {
+	return ColumnAsType[int8](d, col)
+}
+
+func (d *DataFrame) AsInt16(col string) Vector[int16] {
+	return ColumnAsType[int16](d, col)
+}
+
+func (d *DataFrame) AsInt32(col string) Vector[int32] {
+	return ColumnAsType[int32](d, col)
+}
+
+func (d *DataFrame) AsInt64(col string) Vector[int64] {
+	return ColumnAsType[int64](d, col)
+}
+
+func (d *DataFrame) AsBool(col string) Vector[bool] {
+	return ColumnAsType[bool](d, col)
 }
 
 func (m *Matrix) ToString() {
@@ -109,53 +159,32 @@ func (m *Matrix) getColumnTransform(colIndex int, targetType reflect.Type) ([]an
 	return column, nil
 }
 
-func (d *DataFrame) AsFloat32(col string) {
+// func main() {
+// 	// Create a sample Matrix with int64 and float64 data
+// 	matrix := &Matrix{
+// 		Data: [][]any{
+// 			{1, 2.5, "a"},
+// 			{2, 3.5, "b"},
+// 			{3, 4.5, "c"},
+// 		},
+// 	}
 
-}
+// 	// Get the first column and convert to int64
+// 	column, err := matrix.GetColumnAsType(0, "float")
+// 	if err != nil {
+// 		fmt.Println("Error:", err)
+// 		return
+// 	}
+// 	fmt.Println("Column 0:", column)
 
-func isInSlice[T Data](comp T, list []T) bool {
-	for _, value := range list {
-		if comp == value {
-			return true
-		}
-	}
+// 	// Get the second column and convert to float64
+// 	column, err = matrix.GetColumnAsType(1, "int")
+// 	if err != nil {
+// 		fmt.Println("Error:", err)
+// 		return
+// 	}
+// 	fmt.Println("Column 1:", column)
 
-	return false
-}
-
-func (d *DataFrame) AsFloat(col string, floatBase int) {
-	if isInSlice(floatBase, []int{32, 64}) {
-		panic("ERROR: the given size is not a valid float size. pick between 32 or 64.")
-	}
-
-}
-
-func main() {
-	// Create a sample Matrix with int64 and float64 data
-	matrix := &Matrix{
-		Data: [][]any{
-			{1, 2.5, "a"},
-			{2, 3.5, "b"},
-			{3, 4.5, "c"},
-		},
-	}
-
-	// Get the first column and convert to int64
-	column, err := matrix.GetColumnAsType(0, "float")
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	fmt.Println("Column 0:", column)
-
-	// Get the second column and convert to float64
-	column, err = matrix.GetColumnAsType(1, "int")
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	fmt.Println("Column 1:", column)
-
-	// Print matrix
-	matrix.ToString()
-}
+// 	// Print matrix
+// 	matrix.ToString()
+// }
